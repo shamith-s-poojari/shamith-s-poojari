@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/header.svg" alt="Shamith S Poojari" width="100%">
+<img src="assets/header-bac79325.svg" alt="Shamith S Poojari" width="100%">
 
 <a href="https://shamith-s-poojari.github.io">
   <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=26&duration=2800&pause=900&color=39D353&center=true&vCenter=true&width=620&lines=Shamith+S+Poojari;Full-stack+developer;Blockchain+%C2%B7+Cybersecurity+%C2%B7+IoT" alt="Shamith S Poojari, full-stack developer">
@@ -75,7 +75,7 @@ with 40% fewer data-entry errors from client and server validation.<br>
 
 ## ~/ skill radar
 
-<img src="assets/skill-radar.svg" alt="Radar charts of skill areas and languages" width="100%">
+<img src="assets/skill-radar-e8430b62.svg" alt="Radar charts of skill areas and languages" width="100%">
 
 ---
 

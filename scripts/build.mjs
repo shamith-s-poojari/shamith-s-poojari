@@ -1,9 +1,11 @@
-// Generates the two hand-made images the README uses:
-//   assets/header.svg      portrait, white backdrop knocked out, graded dark
-//   assets/skill-radar.svg two radar charts drawn from RADARS below
+// Generates the two hand-made images the README uses, and points the README
+// at them:
+//   assets/header-<hash>.svg      portrait printed in under a soft glow
+//   assets/skill-radar-<hash>.svg two radar charts drawn from RADARS below
 // Run from the repo root:  node scripts/build.mjs
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { readdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
 
 // Self-assessed, 0 to 100. Edit these and rerun the script.
 const RADARS = [
@@ -134,6 +136,17 @@ function radars() {
 `;
 }
 
-writeFileSync('assets/header.svg', header());
-writeFileSync('assets/skill-radar.svg', radars());
-console.log('wrote assets/header.svg, assets/skill-radar.svg');
+// GitHub's raw CDN and browsers both cache these for minutes, and the CDN
+// drops query strings, so each build gets a content-hashed filename and the
+// README is pointed at it. Unchanged content keeps its old name.
+let readme = readFileSync('README.md', 'utf8');
+for (const [name, svg] of [['header', header()], ['skill-radar', radars()]]) {
+  const file = `assets/${name}-${createHash('sha1').update(svg).digest('hex').slice(0, 8)}.svg`;
+  for (const old of readdirSync('assets')) {
+    if (new RegExp(`^${name}(-[0-9a-f]{8})?\\.svg$`).test(old) && `assets/${old}` !== file) unlinkSync(`assets/${old}`);
+  }
+  writeFileSync(file, svg);
+  readme = readme.replace(new RegExp(`assets/${name}(-[0-9a-f]{8})?\\.svg`, 'g'), file);
+  console.log(`wrote ${file}`);
+}
+writeFileSync('README.md', readme);
