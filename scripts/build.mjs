@@ -34,11 +34,18 @@ function header() {
   const W = 840, H = 400, S = 360, x = (W - S) / 2, y = 20;
   // The photo is already lit orange on a dark field, so it only needs its
   // square edges dissolved into the panel. A soft glow behind it breathes.
+  //
+  // It is printed in, row by row, under a glowing print head. SMIL rather
+  // than CSS, because animating a clip rect's height from CSS is not
+  // supported everywhere an <img>-embedded SVG gets drawn.
+  const ROWS = 60, PRINT = 4.5;
+  const band = S / ROWS;
+  const steps = Array.from({ length: ROWS + 1 }, (_, i) => (i * band).toFixed(2));
+  const heights = steps.join(';');
+  const heads = steps.map(h => (y + Number(h)).toFixed(2)).join(';');
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <style>
-    .pic { animation: rise 1.6s cubic-bezier(.2,.7,.2,1) both; }
     .glow { animation: breathe 6s ease-in-out infinite; }
-    @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
     @keyframes breathe { 0%,100% { opacity: .45; } 50% { opacity: .8; } }
   </style>
   <defs>
@@ -47,6 +54,16 @@ function header() {
       <stop offset="100%" stop-color="#000"/>
     </radialGradient>
     <mask id="vignette"><rect x="${x}" y="${y}" width="${S}" height="${S}" fill="url(#fade)"/></mask>
+    <clipPath id="printed">
+      <rect x="${x}" y="${y}" width="${S}" height="0">
+        <animate attributeName="height" values="${heights}" dur="${PRINT}s" begin=".4s" calcMode="discrete" fill="freeze"/>
+      </rect>
+    </clipPath>
+    <linearGradient id="head" x1="0" x2="1">
+      <stop offset="0" stop-color="#ffb37a" stop-opacity="0"/>
+      <stop offset=".5" stop-color="#fff1e0"/>
+      <stop offset="1" stop-color="#ffb37a" stop-opacity="0"/>
+    </linearGradient>
     <radialGradient id="ember" cx="50%" cy="50%" r="50%">
       <stop offset="0%" stop-color="#e8590c" stop-opacity=".5"/>
       <stop offset="100%" stop-color="#e8590c" stop-opacity="0"/>
@@ -54,9 +71,13 @@ function header() {
   </defs>
   <rect width="${W}" height="${H}" rx="12" fill="${BG}"/>
   <ellipse class="glow" cx="${W / 2}" cy="${y + S * 0.5}" rx="${S * 0.7}" ry="${S * 0.55}" fill="url(#ember)"/>
-  <g class="pic" mask="url(#vignette)">
-    <image href="data:image/jpeg;base64,${jpg}" x="${x}" y="${y}" width="${S}" height="${S}"/>
+  <g mask="url(#vignette)">
+    <image href="data:image/jpeg;base64,${jpg}" x="${x}" y="${y}" width="${S}" height="${S}" clip-path="url(#printed)"/>
   </g>
+  <rect x="${x + S * 0.1}" y="${y}" width="${S * 0.8}" height="2" fill="url(#head)" opacity="0">
+    <animate attributeName="y" values="${heads}" dur="${PRINT}s" begin=".4s" calcMode="discrete" fill="freeze"/>
+    <animate attributeName="opacity" values="0;.9;.9;0" keyTimes="0;.02;.96;1" dur="${PRINT}s" begin=".4s" fill="freeze"/>
+  </rect>
 </svg>
 `;
 }
