@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="400" viewBox="0 0 840 400">
+  <style>
+    text { font-family: ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace; }
+    .ttl { fill: #c9d1d9; font-size: 15px; font-weight: 600; }
+    .lbl { fill: #8b949e; font-size: 12px; dominant-baseline: middle; }
+    .val { fill: #39d353; }
+    .shape { animation: grow 1.4s cubic-bezier(.2,.7,.2,1) both; }
+    g + g .shape { animation-delay: .25s; }
+    @keyframes grow { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  </style>
+  <rect width="840" height="400" rx="12" fill="#0d1117"/>
+  <g>
+    <text x="210" y="51" text-anchor="middle" class="ttl">skill areas</text>
+    <polygon points="210.0,185.0 233.5,196.3 239.2,221.7 223.0,242.0 197.0,242.0 180.8,221.7 186.5,196.3" fill="none" stroke="#30363d"/><polygon points="210.0,155.0 256.9,177.6 268.5,228.4 236.0,269.1 184.0,269.1 151.5,228.4 163.1,177.6" fill="none" stroke="#30363d"/><polygon points="210.0,125.0 280.4,158.9 297.7,235.0 249.0,296.1 171.0,296.1 122.3,235.0 139.6,158.9" fill="none" stroke="#30363d"/><polygon points="210.0,95.0 303.8,140.2 327.0,241.7 262.1,323.1 157.9,323.1 93.0,241.7 116.2,140.2" fill="none" stroke="#30363d"/><line x1="210" y1="215" x2="210.0" y2="95.0" stroke="#30363d"/><line x1="210" y1="215" x2="303.8" y2="140.2" stroke="#30363d"/><line x1="210" y1="215" x2="327.0" y2="241.7" stroke="#30363d"/><line x1="210" y1="215" x2="262.1" y2="323.1" stroke="#30363d"/><line x1="210" y1="215" x2="157.9" y2="323.1" stroke="#30363d"/><line x1="210" y1="215" x2="93.0" y2="241.7" stroke="#30363d"/><line x1="210" y1="215" x2="116.2" y2="140.2" stroke="#30363d"/>
+    <g class="shape" style="transform-origin:210px 215px">
+      <polygon points="210.0,119.0 285.1,155.1 297.7,235.0 249.0,296.1 176.2,285.3 134.0,232.4 134.9,155.1" fill="#39d353" fill-opacity=".22" stroke="#39d353" stroke-width="2" stroke-linejoin="round"/>
+      <circle cx="210.0" cy="119.0" r="3" fill="#39d353"/><circle cx="285.1" cy="155.1" r="3" fill="#39d353"/><circle cx="297.7" cy="235.0" r="3" fill="#39d353"/><circle cx="249.0" cy="296.1" r="3" fill="#39d353"/><circle cx="176.2" cy="285.3" r="3" fill="#39d353"/><circle cx="134.0" cy="232.4" r="3" fill="#39d353"/><circle cx="134.9" cy="155.1" r="3" fill="#39d353"/>
+    </g>
+    <text x="210.0" y="71.0" text-anchor="middle" class="lbl">Frontend<tspan class="val"> 80</tspan></text><text x="322.6" y="125.2" text-anchor="start" class="lbl">Backend<tspan class="val"> 80</tspan></text><text x="350.4" y="247.0" text-anchor="start" class="lbl">Databases<tspan class="val"> 75</tspan></text><text x="272.5" y="344.7" text-anchor="start" class="lbl">Blockchain<tspan class="val"> 75</tspan></text><text x="147.5" y="344.7" text-anchor="end" class="lbl">Security<tspan class="val"> 65</tspan></text><text x="69.6" y="247.0" text-anchor="end" class="lbl">DSA<tspan class="val"> 65</tspan></text><text x="97.4" y="125.2" text-anchor="end" class="lbl">Git &amp; tools<tspan class="val"> 80</tspan></text>
+  </g>
+  <g>
+    <text x="630" y="51" text-anchor="middle" class="ttl">languages</text>
+    <polygon points="630.0,185.0 656.0,200.0 656.0,230.0 630.0,245.0 604.0,230.0 604.0,200.0" fill="none" stroke="#30363d"/><polygon points="630.0,155.0 682.0,185.0 682.0,245.0 630.0,275.0 578.0,245.0 578.0,185.0" fill="none" stroke="#30363d"/><polygon points="630.0,125.0 707.9,170.0 707.9,260.0 630.0,305.0 552.1,260.0 552.1,170.0" fill="none" stroke="#30363d"/><polygon points="630.0,95.0 733.9,155.0 733.9,275.0 630.0,335.0 526.1,275.0 526.1,155.0" fill="none" stroke="#30363d"/><line x1="630" y1="215" x2="630.0" y2="95.0" stroke="#30363d"/><line x1="630" y1="215" x2="733.9" y2="155.0" stroke="#30363d"/><line x1="630" y1="215" x2="733.9" y2="275.0" stroke="#30363d"/><line x1="630" y1="215" x2="630.0" y2="335.0" stroke="#30363d"/><line x1="630" y1="215" x2="526.1" y2="275.0" stroke="#30363d"/><line x1="630" y1="215" x2="526.1" y2="155.0" stroke="#30363d"/>
+    <g class="shape" style="transform-origin:630px 215px">
+      <polygon points="630.0,113.0 702.7,173.0 697.5,254.0 630.0,305.0 557.3,257.0 567.6,179.0" fill="#39d353" fill-opacity=".22" stroke="#39d353" stroke-width="2" stroke-linejoin="round"/>
+      <circle cx="630.0" cy="113.0" r="3" fill="#39d353"/><circle cx="702.7" cy="173.0" r="3" fill="#39d353"/><circle cx="697.5" cy="254.0" r="3" fill="#39d353"/><circle cx="630.0" cy="305.0" r="3" fill="#39d353"/><circle cx="557.3" cy="257.0" r="3" fill="#39d353"/><circle cx="567.6" cy="179.0" r="3" fill="#39d353"/>
+    </g>
+    <text x="630.0" y="71.0" text-anchor="middle" class="lbl">JavaScript<tspan class="val"> 85</tspan></text><text x="754.7" y="143.0" text-anchor="start" class="lbl">Java<tspan class="val"> 70</tspan></text><text x="754.7" y="287.0" text-anchor="start" class="lbl">Python<tspan class="val"> 65</tspan></text><text x="630.0" y="359.0" text-anchor="middle" class="lbl">SQL<tspan class="val"> 75</tspan></text><text x="505.3" y="287.0" text-anchor="end" class="lbl">Solidity<tspan class="val"> 70</tspan></text><text x="505.3" y="143.0" text-anchor="end" class="lbl">C<tspan class="val"> 60</tspan></text>
+  </g>
+</svg>
