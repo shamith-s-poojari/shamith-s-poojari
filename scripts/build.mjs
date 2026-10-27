@@ -35,14 +35,29 @@ function header() {
   // The photo is already lit orange on a dark field, so it only needs its
   // square edges dissolved into the panel. A soft glow behind it breathes.
   //
-  // It is printed in, row by row, under a glowing print head. SMIL rather
-  // than CSS, because animating a clip rect's height from CSS is not
-  // supported everywhere an <img>-embedded SVG gets drawn.
-  const ROWS = 60, PRINT = 4.5;
+  // It is printed in like an inkjet: a carriage sweeps each swath, alternating
+  // direction, and the paper advances a swath per pass. The clip is the rows
+  // already done plus the swath the carriage is laying down. SMIL rather than
+  // CSS, because animating clip rect geometry from CSS is not supported
+  // everywhere an <img>-embedded SVG gets drawn.
+  const ROWS = 24, PRINT = 7, BEGIN = '.4s';
   const band = S / ROWS;
-  const steps = Array.from({ length: ROWS + 1 }, (_, i) => (i * band).toFixed(2));
-  const heights = steps.join(';');
-  const heads = steps.map(h => (y + Number(h)).toFixed(2)).join(';');
+  const f = (n) => n.toFixed(2);
+  const rowsKT = Array.from({ length: ROWS + 1 }, (_, i) => (i / ROWS).toFixed(4)).join(';');
+  const doneH = Array.from({ length: ROWS + 1 }, (_, i) => f(i * band)).join(';');
+  const rowY = Array.from({ length: ROWS + 1 }, (_, i) => f(y + Math.min(i, ROWS - 1) * band)).join(';');
+  // Two keyframes per pass, the second a hair before the next pass starts so
+  // the swath snaps back to empty instead of shrinking.
+  const kt = [], sx = [], sw = [], carriage = [];
+  for (let i = 0; i < ROWS; i++) {
+    const ltr = i % 2 === 0, ry = y + i * band;
+    const t0 = i / ROWS, t1 = i === ROWS - 1 ? 1 : (i + 1) / ROWS - 0.0005;
+    kt.push(t0.toFixed(4), t1.toFixed(4));
+    sx.push(f(ltr ? x : x + S), f(x));
+    sw.push('0', f(S));
+    carriage.push(`${f(ltr ? x : x + S)},${f(ry)}`, `${f(ltr ? x + S : x)},${f(ry)}`);
+  }
+  const timing = `dur="${PRINT}s" begin="${BEGIN}" fill="freeze"`;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <style>
     .glow { animation: breathe 6s ease-in-out infinite; }
@@ -56,14 +71,18 @@ function header() {
     <mask id="vignette"><rect x="${x}" y="${y}" width="${S}" height="${S}" fill="url(#fade)"/></mask>
     <clipPath id="printed">
       <rect x="${x}" y="${y}" width="${S}" height="0">
-        <animate attributeName="height" values="${heights}" dur="${PRINT}s" begin=".4s" calcMode="discrete" fill="freeze"/>
+        <animate attributeName="height" values="${doneH}" keyTimes="${rowsKT}" calcMode="discrete" ${timing}/>
+      </rect>
+      <rect x="${x}" y="${y}" width="0" height="${f(band)}">
+        <animate attributeName="y" values="${rowY}" keyTimes="${rowsKT}" calcMode="discrete" ${timing}/>
+        <animate attributeName="x" values="${sx.join(';')}" keyTimes="${kt.join(';')}" ${timing}/>
+        <animate attributeName="width" values="${sw.join(';')}" keyTimes="${kt.join(';')}" ${timing}/>
       </rect>
     </clipPath>
-    <linearGradient id="head" x1="0" x2="1">
-      <stop offset="0" stop-color="#ffb37a" stop-opacity="0"/>
-      <stop offset=".5" stop-color="#fff1e0"/>
+    <radialGradient id="mist" cx="50%" cy="0%" r="100%">
+      <stop offset="0" stop-color="#ffb37a" stop-opacity=".7"/>
       <stop offset="1" stop-color="#ffb37a" stop-opacity="0"/>
-    </linearGradient>
+    </radialGradient>
     <radialGradient id="ember" cx="50%" cy="50%" r="50%">
       <stop offset="0%" stop-color="#e8590c" stop-opacity=".5"/>
       <stop offset="100%" stop-color="#e8590c" stop-opacity="0"/>
@@ -74,10 +93,21 @@ function header() {
   <g mask="url(#vignette)">
     <image href="data:image/jpeg;base64,${jpg}" x="${x}" y="${y}" width="${S}" height="${S}" clip-path="url(#printed)"/>
   </g>
-  <rect x="${x + S * 0.1}" y="${y}" width="${S * 0.8}" height="2" fill="url(#head)" opacity="0">
-    <animate attributeName="y" values="${heads}" dur="${PRINT}s" begin=".4s" calcMode="discrete" fill="freeze"/>
-    <animate attributeName="opacity" values="0;.9;.9;0" keyTimes="0;.02;.96;1" dur="${PRINT}s" begin=".4s" fill="freeze"/>
-  </rect>
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.01;.97;1" ${timing}/>
+    <line x1="${x - 24}" x2="${x + S + 24}" y1="${f(y + band / 2)}" y2="${f(y + band / 2)}" stroke="#3a414b" stroke-width="2">
+      <animateTransform attributeName="transform" type="translate" values="${rowY.split(';').map(v => `0,${f(v - y)}`).join(';')}" keyTimes="${rowsKT}" calcMode="discrete" ${timing}/>
+    </line>
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="${carriage.join(';')}" keyTimes="${kt.join(';')}" ${timing}/>
+      <ellipse cx="0" cy="${f(band)}" rx="16" ry="${f(band * 0.9)}" fill="url(#mist)"/>
+      <rect x="-15" y="-6" width="30" height="${f(band + 6)}" rx="3" fill="#1f242c" stroke="#4a525d"/>
+      <rect x="-11" y="${f(band - 4)}" width="4" height="3" fill="#00b7eb"/>
+      <rect x="-5" y="${f(band - 4)}" width="4" height="3" fill="#ec008c"/>
+      <rect x="1" y="${f(band - 4)}" width="4" height="3" fill="#ffe600"/>
+      <rect x="7" y="${f(band - 4)}" width="4" height="3" fill="#8b949e"/>
+    </g>
+  </g>
 </svg>
 `;
 }
