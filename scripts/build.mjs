@@ -42,7 +42,7 @@ function header() {
   const band = S / ROWS;
   const steps = Array.from({ length: ROWS + 1 }, (_, i) => (i * band).toFixed(2));
   const heights = steps.join(';');
-  const heads = steps.map(h => (y + Number(h)).toFixed(2)).join(';');
+  const heads = steps.map(h => (y + Number(h) - 2.5).toFixed(2)).join(';');
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <style>
     .glow { animation: breathe 6s ease-in-out infinite; }
@@ -61,9 +61,10 @@ function header() {
     </clipPath>
     <linearGradient id="head" x1="0" x2="1">
       <stop offset="0" stop-color="#ffb37a" stop-opacity="0"/>
-      <stop offset=".5" stop-color="#fff1e0"/>
+      <stop offset=".5" stop-color="#ffc999"/>
       <stop offset="1" stop-color="#ffb37a" stop-opacity="0"/>
     </linearGradient>
+    <filter id="soft" x="-10%" y="-300%" width="120%" height="700%"><feGaussianBlur stdDeviation="3"/></filter>
     <radialGradient id="ember" cx="50%" cy="50%" r="50%">
       <stop offset="0%" stop-color="#e8590c" stop-opacity=".5"/>
       <stop offset="100%" stop-color="#e8590c" stop-opacity="0"/>
@@ -74,9 +75,9 @@ function header() {
   <g mask="url(#vignette)">
     <image href="data:image/jpeg;base64,${jpg}" x="${x}" y="${y}" width="${S}" height="${S}" clip-path="url(#printed)"/>
   </g>
-  <rect x="${x + S * 0.1}" y="${y}" width="${S * 0.8}" height="2" fill="url(#head)" opacity="0">
+  <rect x="${x + S * 0.1}" y="${y}" width="${S * 0.8}" height="5" fill="url(#head)" filter="url(#soft)" opacity="0">
     <animate attributeName="y" values="${heads}" dur="${PRINT}s" begin=".4s" calcMode="discrete" fill="freeze"/>
-    <animate attributeName="opacity" values="0;.9;.9;0" keyTimes="0;.02;.96;1" dur="${PRINT}s" begin=".4s" fill="freeze"/>
+    <animate attributeName="opacity" values="0;.6;.6;0" keyTimes="0;.02;.96;1" dur="${PRINT}s" begin=".4s" fill="freeze"/>
   </rect>
 </svg>
 `;
