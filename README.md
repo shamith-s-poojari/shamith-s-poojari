@@ -13,10 +13,6 @@
 <a href="https://shamith-s-poojari.github.io"><img src="https://img.shields.io/badge/Portfolio-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Portfolio"></a>
 <a href="https://shamith-s-poojari.github.io/Shamith-Poojari-Resume.pdf"><img src="https://img.shields.io/badge/Resume-F7B32B?style=for-the-badge&logo=readdotcv&logoColor=black" alt="Resume"></a>
 
-<br>
-
-<img src="https://komarev.com/ghpvc/?username=shamith-s-poojari&label=profile%20views&color=39d353&style=flat" alt="profile views">
-
 </div>
 
 ---
