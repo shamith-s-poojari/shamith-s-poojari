@@ -26,7 +26,7 @@ const RADARS = [
 ];
 
 const BG = '#0d1117';     // GitHub dark canvas, so the panels sit flush there
-const GREEN = '#39d353';
+const ACCENT = '#ffffff';
 const GRID = '#30363d';
 const MUTED = '#8b949e';
 const MONO = "ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace";
@@ -99,7 +99,7 @@ function radar({ title, axes }, cx, cy, r) {
     .join('');
   const shape = axes.map(([, v], i) => pt(i, v / 100).map(c => c.toFixed(1)).join(',')).join(' ');
   const dots = axes
-    .map(([, v], i) => { const [x, y] = pt(i, v / 100); return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="${GREEN}"/>`; })
+    .map(([, v], i) => { const [x, y] = pt(i, v / 100); return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="${ACCENT}"/>`; })
     .join('');
   const labels = axes.map(([name, v], i) => {
     const [x, y] = pt(i, 1.2);
@@ -110,7 +110,7 @@ function radar({ title, axes }, cx, cy, r) {
     <text x="${cx}" y="${cy - r - 44}" text-anchor="middle" class="ttl">${title}</text>
     ${rings}${spokes}
     <g class="shape" style="transform-origin:${cx}px ${cy}px">
-      <polygon points="${shape}" fill="${GREEN}" fill-opacity=".22" stroke="${GREEN}" stroke-width="2" stroke-linejoin="round"/>
+      <polygon points="${shape}" fill="${ACCENT}" fill-opacity=".22" stroke="${ACCENT}" stroke-width="2" stroke-linejoin="round"/>
       ${dots}
     </g>
     ${labels}
@@ -124,7 +124,7 @@ function radars() {
     text { font-family: ${MONO}; }
     .ttl { fill: #c9d1d9; font-size: 15px; font-weight: 600; }
     .lbl { fill: ${MUTED}; font-size: 12px; dominant-baseline: middle; }
-    .val { fill: ${GREEN}; }
+    .val { fill: ${ACCENT}; }
     .shape { animation: grow 1.4s cubic-bezier(.2,.7,.2,1) both; }
     g + g .shape { animation-delay: .25s; }
     @keyframes grow { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
