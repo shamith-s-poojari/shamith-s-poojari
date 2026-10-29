@@ -61,9 +61,41 @@ for ($r = 0; $r -lt $ROWS; $r++) {
     if ($n -lt 10) { continue }               # fewer than 10 of 25 neighbours lit: a speck
     $v = $lum[$r, $c] + $SHARPEN * ($lum[$r, $c] - $sum / $n)
     $val[$r, $c] = $v; $keep[$r, $c] = $true
-    $seen.Add($v)
   }
 }
+
+# Keep only the largest connected shape, head through chest. The crop cuts
+# through the shoulders, which otherwise leaves a sliver of jacket floating
+# off on its own beside the neck.
+$part = New-Object 'int[,]' $ROWS, $COLS
+$sizes = @{}; $id = 0
+for ($r = 0; $r -lt $ROWS; $r++) {
+  for ($c = 0; $c -lt $COLS; $c++) {
+    if (-not $keep[$r, $c] -or $part[$r, $c]) { continue }
+    $id++; $sizes[$id] = 0
+    $stack = New-Object System.Collections.Generic.Stack[int[]]
+    $stack.Push(@($r, $c)); $part[$r, $c] = $id
+    while ($stack.Count) {
+      $at = $stack.Pop(); $sizes[$id]++
+      for ($dr = -1; $dr -le 1; $dr++) {
+        for ($dc = -1; $dc -le 1; $dc++) {
+          $rr = $at[0] + $dr; $cc = $at[1] + $dc
+          if ((Inside $rr $cc) -and $keep[$rr, $cc] -and -not $part[$rr, $cc]) {
+            $part[$rr, $cc] = $id; $stack.Push(@($rr, $cc))
+          }
+        }
+      }
+    }
+  }
+}
+$main = ($sizes.GetEnumerator() | Sort-Object Value -Descending | Select-Object -First 1).Key
+for ($r = 0; $r -lt $ROWS; $r++) {
+  for ($c = 0; $c -lt $COLS; $c++) {
+    if (-not $keep[$r, $c]) { continue }
+    if ($part[$r, $c] -ne $main) { $keep[$r, $c] = $false } else { $v = $val[$r, $c]; $seen.Add($v) }
+  }
+}
+Write-Output "kept the main shape, dropped $($sizes.Count - 1) loose pieces"
 
 # Third pass: spread the subject's tones evenly over the ramp (histogram
 # equalisation). The shadowed half of the face and the near-black hair would
