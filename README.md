@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/header-8382ff5d.svg" alt="Shamith S Poojari" width="100%">
+<img src="assets/header-ceba8f9b.svg" alt="Shamith S Poojari" width="100%">
 
 <a href="https://shamith-s-poojari.github.io">
   <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=600&size=24&duration=2800&pause=900&color=FFFFFF&center=true&vCenter=true&width=760&lines=Shamith+S+Poojari;Full-stack+developer;Blockchain+%C2%B7+Cybersecurity+%C2%B7+IoT" alt="Shamith S Poojari, full-stack developer">

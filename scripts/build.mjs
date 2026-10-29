@@ -75,10 +75,12 @@ function header() {
   const ax = 22, ay = (H - art.length * ALH) / 2 + AFS, ix = 452, iy = 24 + IFS;
   // Both halves print in top to bottom, a line at a time. SMIL rather than
   // CSS, because CSS animation delays are not honoured everywhere an
-  // <img>-embedded SVG gets drawn.
-  const show = (t) => `<set attributeName="opacity" to="1" begin="${t.toFixed(2)}s" fill="freeze"/>`;
+  // <img>-embedded SVG gets drawn. Everything is visible by default and the
+  // animation hides it until its turn, so anywhere that does not animate
+  // (the GitHub mobile app, reduced motion) still shows the finished image.
+  const show = (t) => `<animate attributeName="opacity" values="0;1" keyTimes="0;.999" calcMode="discrete" dur="${t.toFixed(2)}s" fill="freeze"/>`;
   const rows = art.map((line, i) =>
-    `<text x="${ax}" y="${(ay + i * ALH).toFixed(1)}" class="art" opacity="0"${line ? ` textLength="${(line.length * ACW).toFixed(1)}" lengthAdjust="spacingAndGlyphs"` : ''}>${esc(line)}${show(0.3 + i * 0.07)}</text>`).join('\n  ');
+    `<text x="${ax}" y="${(ay + i * ALH).toFixed(1)}" class="art"${line ? ` textLength="${(line.length * ACW).toFixed(1)}" lengthAdjust="spacingAndGlyphs"` : ''}>${esc(line)}${show(0.3 + i * 0.07)}</text>`).join('\n  ');
   const len = (s) => s.replace(/&amp;/g, '&').length;
   const lines = INFO.map(([key, value], i) => {
     const y = (iy + i * ILH).toFixed(1);
@@ -90,7 +92,7 @@ function header() {
       const dots = '.'.repeat(Math.max(2, WIDTH - key.length - len(value) - 3));
       body = `<tspan class="key">${key}</tspan><tspan class="dots">: ${dots} </tspan><tspan class="val">${value}</tspan>`;
     }
-    return `<text x="${ix}" y="${y}" class="info" opacity="0">${body}${show(0.5 + i * 0.1)}</text>`;
+    return `<text x="${ix}" y="${y}" class="info">${body}${show(0.5 + i * 0.1)}</text>`;
   }).filter(Boolean).join('\n  ');
   const cy = iy + INFO.length * ILH - IFS;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
@@ -109,7 +111,7 @@ function header() {
   ${rows}
   ${lines}
   </g>
-  <g opacity="0">${show(0.5 + INFO.length * 0.1)}
+  <g>${show(0.5 + INFO.length * 0.1)}
     <rect x="${ix}" y="${(cy + ILH * 0.6).toFixed(1)}" width="${(IFS * 0.6).toFixed(1)}" height="${IFS}" fill="#ffffff" class="cursor"/>
   </g>
 </svg>
