@@ -29,7 +29,10 @@ const BG = '#0d1117';     // GitHub dark canvas, so the panels sit flush there
 const ACCENT = '#ffffff';
 const GRID = '#30363d';
 const MUTED = '#8b949e';
-const MONO = "ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace";
+// Opacity of each portrait shade, darkest first; portrait-ascii.ps1 writes
+// as many shades as there are entries here.
+const SHADES = [0.13, 0.25, 0.43, 0.63, 0.83, 1];
+const MONO ="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace";
 
 // The terminal panel beside the ASCII portrait, neofetch style. A null key is
 // a blank line; a key with no value is a section heading.
@@ -79,8 +82,19 @@ function header() {
   // animation hides it until its turn, so anywhere that does not animate
   // (the GitHub mobile app, reduced motion) still shows the finished image.
   const show = (t) => `<animate attributeName="opacity" values="0;1" keyTimes="0;.999" calcMode="discrete" dur="${t.toFixed(2)}s" fill="freeze"/>`;
-  const rows = art.map((line, i) =>
-    `<text x="${ax}" y="${(ay + i * ALH).toFixed(1)}" class="art"${line ? ` textLength="${(line.length * ACW).toFixed(1)}" lengthAdjust="spacingAndGlyphs"` : ''}>${esc(line)}${show(0.3 + i * 0.07)}</text>`).join('\n  ');
+  // Each row is drawn once per shade, dim to bright, holding only that
+  // shade's characters, so the light on the face follows the photo. The
+  // layers of a row are all the row's full length and land on one grid.
+  const tone = readFileSync('assets/portrait-tone.txt', 'utf8').split(/\r?\n/);
+  const rows = art.map((line, i) => {
+    const y = (ay + i * ALH).toFixed(1);
+    const fit = ` textLength="${(line.length * ACW).toFixed(1)}" lengthAdjust="spacingAndGlyphs"`;
+    const layers = SHADES.map((_, s) => {
+      const only = [...line].map((ch, c) => (tone[i]?.[c] === String(s) ? ch : ' ')).join('');
+      return only.trim() ? `<text x="${ax}" y="${y}" class="art s${s}"${fit}>${esc(only)}</text>` : '';
+    }).join('');
+    return `<g>${show(0.3 + i * 0.07)}${layers}</g>`;
+  }).join('\n  ');
   const len = (s) => s.replace(/&amp;/g, '&').length;
   const lines = INFO.map(([key, value], i) => {
     const y = (iy + i * ILH).toFixed(1);
@@ -98,7 +112,8 @@ function header() {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <style>
     text { font-family: ${MONO}; white-space: pre; }
-    .art { fill: #e6edf3; font-size: ${AFS}px; }
+    .art { fill: #ffffff; font-size: ${AFS}px; }
+    ${SHADES.map((o, s) => `.s${s} { opacity: ${o}; }`).join(' ')}
     .info { font-size: ${IFS}px; }
     .key { fill: #ffffff; font-weight: 700; }
     .dots { fill: #484f58; }

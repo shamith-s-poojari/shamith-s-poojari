@@ -1,5 +1,5 @@
-# Turns assets/portrait.jpg into assets/portrait-ascii.txt, which build.mjs
-# draws into the header. Rerun this only when the photo changes; Node has no
+# Turns assets/portrait.jpg into assets/portrait-ascii.txt and a matching
+# assets/portrait-tone.txt of shades, which build.mjs draws into the header. Rerun this only when the photo changes; Node has no
 # JPEG decoder, so the sampling happens here with the built-in System.Drawing.
 # Run from the repo root:  powershell -File scripts/portrait-ascii.ps1
 
@@ -12,8 +12,11 @@ $SHARPEN = 0.8                   # how hard features are pulled out of their sur
 $RAMP = " .'``^,:;Il!i><~+_-?][}{1)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
 
 $img = [System.Drawing.Bitmap]::new((Resolve-Path 'assets/portrait.jpg').Path)
-$cw = $img.Width / $COLS
-$ch = $img.Height / $ROWS
+# Square crop around the head, in photo pixels: left, top, size. The full
+# frame spends a third of the grid on backdrop and jacket.
+$CROP = @(70, 0, 530)
+$cw = $CROP[2] / $COLS
+$ch = $CROP[2] / $ROWS
 
 # First pass: average brightness per cell, and whether the backdrop shows.
 $lum = New-Object 'double[,]' $ROWS, $COLS
@@ -21,8 +24,8 @@ $fg = New-Object 'bool[,]' $ROWS, $COLS
 for ($r = 0; $r -lt $ROWS; $r++) {
   for ($c = 0; $c -lt $COLS; $c++) {
     $sum = 0.0; $bg = 0; $n = 0
-    for ($y = [int]($r * $ch); $y -lt [int](($r + 1) * $ch); $y++) {
-      for ($x = [int]($c * $cw); $x -lt [int](($c + 1) * $cw); $x += 2) {
+    for ($y = $CROP[1] + [int]($r * $ch); $y -lt $CROP[1] + [int](($r + 1) * $ch); $y++) {
+      for ($x = $CROP[0] + [int]($c * $cw); $x -lt $CROP[0] + [int](($c + 1) * $cw); $x += 2) {
         $p = $img.GetPixel($x, $y)
         # The backdrop is saturated orange: lots of red, little green, almost
         # no blue. Skin and hair keep green and blue in proportion.
@@ -67,9 +70,16 @@ for ($r = 0; $r -lt $ROWS; $r++) {
 # otherwise all land on the first few rungs and read as dots.
 $sorted = $seen.ToArray(); [array]::Sort($sorted)
 $top = $RAMP.Length - 1
+#
+# Alongside each character goes a shade, 0 to $SHADES - 1, from the cell's
+# plain brightness; build.mjs draws each shade as its own layer, dimmer to
+# brighter, so the light falls across the face the way it does in the photo.
+$SHADES = 6
+$tones = New-Object System.Collections.Generic.List[string]
 $lines = for ($r = 0; $r -lt $ROWS; $r++) {
+  $tone = ''
   $line = for ($c = 0; $c -lt $COLS; $c++) {
-    if (-not $keep[$r, $c]) { ' '; continue }
+    if (-not $keep[$r, $c]) { $tone += ' '; ' '; continue }
     $v = $val[$r, $c]
     $rank = [array]::BinarySearch($sorted, $v)
     if ($rank -lt 0) { $rank = -bnot $rank }
@@ -77,9 +87,12 @@ $lines = for ($r = 0; $r -lt $ROWS; $r++) {
     # hair turns into busy letters.
     $lin = [math]::Max(0.0, [math]::Min(1.0, ($v - $sorted[0]) / ($sorted[-1] - $sorted[0])))
     $t = 0.55 * $rank / ($sorted.Length - 1) + 0.45 * $lin
+    $tone += [string][math]::Min($SHADES - 1, [int][math]::Floor([math]::Pow($lin, 1.1) * $SHADES))
     $RAMP[1 + [int][math]::Floor($t * ($top - 1))]     # rung 0 is the space, kept for the backdrop
   }
+  $tones.Add($tone.TrimEnd())
   (-join $line).TrimEnd()
 }
 Set-Content -Path 'assets/portrait-ascii.txt' -Value ($lines -join "`n") -Encoding ascii -NoNewline
-Write-Output 'wrote assets/portrait-ascii.txt'
+Set-Content -Path 'assets/portrait-tone.txt' -Value ($tones -join "`n") -Encoding ascii -NoNewline
+Write-Output 'wrote assets/portrait-ascii.txt and assets/portrait-tone.txt'
