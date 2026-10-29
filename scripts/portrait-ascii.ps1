@@ -29,13 +29,17 @@ for ($r = 0; $r -lt $ROWS; $r++) {
         $p = $img.GetPixel($x, $y)
         # The backdrop is saturated orange: lots of red, little green, almost
         # no blue. Skin and hair keep green and blue in proportion.
-        if ($p.R -gt 45 -and $p.G -lt 0.42 * $p.R -and $p.B -lt 0.15 * $p.R + 8) { $bg++ }
-        $sum += 0.299 * $p.R + 0.587 * $p.G + 0.114 * $p.B
         $n++
+        if ($p.R -gt 45 -and $p.G -lt 0.42 * $p.R -and $p.B -lt 0.15 * $p.R + 8) { $bg++; continue }
+        # Brightness from the subject's pixels only: cells on the outline
+        # otherwise average in the glowing backdrop and turn into a bright
+        # rim. Red is weighted down too, since the whole photo is lit orange
+        # and the orange-lit edge of the face would still glow.
+        $sum += 0.2 * $p.R + 0.7 * $p.G + 0.1 * $p.B
       }
     }
-    $lum[$r, $c] = $sum / $n / 255
     $fg[$r, $c] = $bg / $n -le 0.5
+    $lum[$r, $c] = if ($n -gt $bg) { $sum / ($n - $bg) / 255 } else { 0 }
   }
 }
 $img.Dispose()
@@ -120,7 +124,9 @@ $lines = for ($r = 0; $r -lt $ROWS; $r++) {
     $lin = [math]::Max(0.0, [math]::Min(1.0, ($v - $sorted[0]) / ($sorted[-1] - $sorted[0])))
     $t = 0.55 * $rank / ($sorted.Length - 1) + 0.45 * $lin
     $tone += [string][math]::Min($SHADES - 1, [int][math]::Floor([math]::Pow($lin, 1.1) * $SHADES))
-    $RAMP[1 + [int][math]::Floor($t * ($top - 1))]     # rung 0 is the space, kept for the backdrop
+    # Rung 0 is the space, kept for the backdrop. The last few rungs are near
+    # solid glyphs that run together into a block, so highlights stop short.
+    $RAMP[1 + [int][math]::Floor($t * 0.9 * ($top - 1))]
   }
   $tones.Add($tone.TrimEnd())
   (-join $line).TrimEnd()

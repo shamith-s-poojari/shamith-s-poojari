@@ -31,7 +31,7 @@ const GRID = '#30363d';
 const MUTED = '#8b949e';
 // Opacity of each portrait shade, darkest first; portrait-ascii.ps1 writes
 // as many shades as there are entries here.
-const SHADES = [0.13, 0.25, 0.43, 0.63, 0.83, 1];
+const SHADES = [0.13, 0.25, 0.41, 0.58, 0.74, 0.88];
 const MONO ="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace";
 
 // The terminal panel beside the ASCII portrait, neofetch style. A null key is
