@@ -1,6 +1,6 @@
 // Generates the two hand-made images the README uses, and points the README
 // at them:
-//   assets/header-<hash>.svg      portrait printed in under a soft glow
+//   assets/header-<hash>.svg      ASCII portrait beside a neofetch-style panel
 //   assets/skill-radar-<hash>.svg two radar charts drawn from RADARS below
 // Run from the repo root:  node scripts/build.mjs
 
@@ -31,56 +31,87 @@ const GRID = '#30363d';
 const MUTED = '#8b949e';
 const MONO = "ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace";
 
+// The terminal panel beside the ASCII portrait, neofetch style. A null key is
+// a blank line; a key with no value is a section heading.
+const INFO = [
+  ['shamith@github'],
+  ['-'.repeat(14)],
+  ['Name', 'Shamith S Poojari'],
+  ['Role', 'Full-stack developer'],
+  ['Education', 'B.E. Computer Science, MITE'],
+  ['Graduating', '2027'],
+  ['Focus', 'Blockchain · Cybersecurity · IoT'],
+  ['Location', 'Moodbidri, Karnataka'],
+  ['Status', 'Open to internships &amp; roles'],
+  [null],
+  ['Languages.Code', 'Java, Python, JavaScript, C'],
+  ['Languages.Chain', 'Solidity'],
+  ['Languages.Data', 'MySQL, PostgreSQL'],
+  ['Stack.Web', 'React, Node.js, Express'],
+  ['Stack.Tools', 'Git, Postman, VS Code'],
+  [null],
+  ['Building', 'Chain of Custody'],
+  ['Interned', 'Ankyah Nexus, 2026'],
+  [null],
+  ['Contact'],
+  ['Email', 'shamithgoogl@gmail.com'],
+  ['LinkedIn', 'shamith-s-poojari'],
+  ['Portfolio', 'shamith-s-poojari.github.io'],
+];
+
 function header() {
-  const jpg = readFileSync('assets/portrait.jpg').toString('base64');
-  const W = 840, H = 400, S = 360, x = (W - S) / 2, y = 20;
-  // The photo is already lit orange on a dark field, so it only needs its
-  // square edges dissolved into the panel. A soft glow behind it breathes.
-  //
-  // It is printed in, row by row, under a glowing print head. SMIL rather
-  // than CSS, because animating a clip rect's height from CSS is not
-  // supported everywhere an <img>-embedded SVG gets drawn.
-  const ROWS = 60, PRINT = 4.5;
-  const band = S / ROWS;
-  const steps = Array.from({ length: ROWS + 1 }, (_, i) => (i * band).toFixed(2));
-  const heights = steps.join(';');
-  const heads = steps.map(h => (y + Number(h) - 2.5).toFixed(2)).join(';');
+  // Made by scripts/portrait-ascii.ps1 from assets/portrait.jpg.
+  // Spaces become no-break spaces, since some renderers collapse leading
+  // whitespace in SVG text even with xml:space set.
+  const art = readFileSync('assets/portrait-ascii.txt', 'utf8').split(/\r?\n/);
+  const esc = (l) => l.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/ /g, ' ');
+  const W = 840, H = 440;
+  // Terminal cells, twice as tall as wide, so the face keeps its shape. Each
+  // row is stretched to an exact width, because monospace fonts differ in
+  // how wide a character is and the portrait would squash or spread.
+  const ALH = (H - 36) / art.length, ACW = ALH / 2, AFS = ALH / 1.15;
+  const IFS = 11.5, ILH = (H - 48) / INFO.length;
+  const WIDTH = 52;                        // info line length in characters
+  const ax = 22, ay = (H - art.length * ALH) / 2 + AFS, ix = 452, iy = 24 + IFS;
+  // Both halves print in top to bottom, a line at a time. SMIL rather than
+  // CSS, because CSS animation delays are not honoured everywhere an
+  // <img>-embedded SVG gets drawn.
+  const show = (t) => `<set attributeName="opacity" to="1" begin="${t.toFixed(2)}s" fill="freeze"/>`;
+  const rows = art.map((line, i) =>
+    `<text x="${ax}" y="${(ay + i * ALH).toFixed(1)}" class="art" opacity="0"${line ? ` textLength="${(line.length * ACW).toFixed(1)}" lengthAdjust="spacingAndGlyphs"` : ''}>${esc(line)}${show(0.3 + i * 0.07)}</text>`).join('\n  ');
+  const len = (s) => s.replace(/&amp;/g, '&').length;
+  const lines = INFO.map(([key, value], i) => {
+    const y = (iy + i * ILH).toFixed(1);
+    if (key == null) return '';
+    let body;
+    if (i === 0) body = `<tspan class="key">${key}</tspan>`;
+    else if (value == null) body = `<tspan class="${i === 1 ? 'dots' : 'key'}">${key}</tspan>`;
+    else {
+      const dots = '.'.repeat(Math.max(2, WIDTH - key.length - len(value) - 3));
+      body = `<tspan class="key">${key}</tspan><tspan class="dots">: ${dots} </tspan><tspan class="val">${value}</tspan>`;
+    }
+    return `<text x="${ix}" y="${y}" class="info" opacity="0">${body}${show(0.5 + i * 0.1)}</text>`;
+  }).filter(Boolean).join('\n  ');
+  const cy = iy + INFO.length * ILH - IFS;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <style>
-    .glow { animation: breathe 6s ease-in-out infinite; }
-    @keyframes breathe { 0%,100% { opacity: .45; } 50% { opacity: .8; } }
+    text { font-family: ${MONO}; white-space: pre; }
+    .art { fill: #e6edf3; font-size: ${AFS}px; }
+    .info { font-size: ${IFS}px; }
+    .key { fill: #ffffff; font-weight: 700; }
+    .dots { fill: #484f58; }
+    .val { fill: #c9d1d9; }
+    .cursor { animation: blink 1s steps(1) infinite; }
+    @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } }
   </style>
-  <defs>
-    <radialGradient id="fade" cx="50%" cy="45%" r="52%">
-      <stop offset="55%" stop-color="#fff"/>
-      <stop offset="100%" stop-color="#000"/>
-    </radialGradient>
-    <mask id="vignette"><rect x="${x}" y="${y}" width="${S}" height="${S}" fill="url(#fade)"/></mask>
-    <clipPath id="printed">
-      <rect x="${x}" y="${y}" width="${S}" height="0">
-        <animate attributeName="height" values="${heights}" dur="${PRINT}s" begin=".4s" calcMode="discrete" fill="freeze"/>
-      </rect>
-    </clipPath>
-    <linearGradient id="head" x1="0" x2="1">
-      <stop offset="0" stop-color="#ffb37a" stop-opacity="0"/>
-      <stop offset=".5" stop-color="#ffc999"/>
-      <stop offset="1" stop-color="#ffb37a" stop-opacity="0"/>
-    </linearGradient>
-    <filter id="soft" x="-10%" y="-300%" width="120%" height="700%"><feGaussianBlur stdDeviation="3"/></filter>
-    <radialGradient id="ember" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#e8590c" stop-opacity=".5"/>
-      <stop offset="100%" stop-color="#e8590c" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
   <rect width="${W}" height="${H}" rx="12" fill="${BG}"/>
-  <ellipse class="glow" cx="${W / 2}" cy="${y + S * 0.5}" rx="${S * 0.7}" ry="${S * 0.55}" fill="url(#ember)"/>
-  <g mask="url(#vignette)">
-    <image href="data:image/jpeg;base64,${jpg}" x="${x}" y="${y}" width="${S}" height="${S}" clip-path="url(#printed)"/>
+  <g xml:space="preserve">
+  ${rows}
+  ${lines}
   </g>
-  <rect x="${x + S * 0.1}" y="${y}" width="${S * 0.8}" height="5" fill="url(#head)" filter="url(#soft)" opacity="0">
-    <animate attributeName="y" values="${heads}" dur="${PRINT}s" begin=".4s" calcMode="discrete" fill="freeze"/>
-    <animate attributeName="opacity" values="0;.6;.6;0" keyTimes="0;.02;.96;1" dur="${PRINT}s" begin=".4s" fill="freeze"/>
-  </rect>
+  <g opacity="0">${show(0.5 + INFO.length * 0.1)}
+    <rect x="${ix}" y="${(cy + ILH * 0.6).toFixed(1)}" width="${(IFS * 0.6).toFixed(1)}" height="${IFS}" fill="#ffffff" class="cursor"/>
+  </g>
 </svg>
 `;
 }
